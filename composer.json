@@ -1,0 +1,23 @@
+{
+    "name": "hocvt/cdn",
+    "description": "CDN",
+    "authors": [
+        {
+            "name": "Vu Thai Hoc",
+            "email": "vuthaihoc.ttud@gmail.com"
+        }
+    ],
+    "require": {
+        "league/glide": "^1.0",
+        "clue/mq-react": "^1.3",
+        "react/http": "^1.2",
+        "clue/redis-react": "^2.4",
+        "predis/predis": "^1.1",
+        "danhunsaker/flysystem-redis": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Colombo\\Cdn\\" : "src/"
+        }
+    }
+}
