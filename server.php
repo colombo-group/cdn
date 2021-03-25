@@ -8,27 +8,47 @@ use React\Http\Server;
 
 $loop = Factory::create();
 
+// start redix
+//$process = new React\ChildProcess\Process('cd "' . __DIR__ . '" && ./redix_darwin_amd64');
+//$process->start($loop);
+//
+//$process->stdout->on('data', function ($chunk) {
+//    echo $chunk;
+//});
+//
+//$process->on('exit', function($exitCode, $termSignal) {
+//    echo 'Process exited with code ' . $exitCode . PHP_EOL;
+//});
+
+
+// setup glide
+
 $config = include __DIR__ . "/config.php";
 
-$glide_server = \League\Glide\ServerFactory::create([
-    'source' => new \League\Flysystem\Filesystem(new \League\Flysystem\Adapter\Local(__DIR__ . "/source")),
-    'cache' => $config['cache'],
-    'response' => new \League\Glide\Responses\PsrResponseFactory(new Response(), function ($stream) {
-        return new \GuzzleHttp\Psr7\Stream($stream);
-    }),
-]);
+$api = new \League\Glide\Api\Api($config['imageManager'], $config['manipulators']);
+
+$glide_server = new \League\Glide\Server(
+    $config['source'],
+    $config['cache'],
+    $api
+);
+
+$glide_server->setResponseFactory(new \League\Glide\Responses\PsrResponseFactory(new Response(), function ($stream) {
+    return new \GuzzleHttp\Psr7\Stream($stream);
+}));
 
 $server = new Server($loop, function (ServerRequestInterface $request) use($loop, $glide_server) {
 
-
-
     try{
-        return $glide_server->getImageResponse($request->getUri()->getPath(), $request->getQueryParams());
+        /** @var \Psr\Http\Message\ResponseInterface $response */
+        $response = $glide_server->getImageResponse($request->getUri()->getPath(), $request->getQueryParams());
+        return $response;
     }catch (\Exception $ex){
-        var_dump($ex->getMessage());
+//        echo "Error " . $ex->getFile() . ":" . $ex->getLine() . "\n";
+//        echo "\t" . $ex->getMessage() . "\n";
     }
 
-    $body = "sss";//var_export($response, true);
+    $body = "Lỗi rồi ...";
 
     return new Response(
         200,

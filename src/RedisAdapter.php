@@ -121,7 +121,7 @@ class RedisAdapter extends AbstractAdapter
             throw new \League\Flysystem\FileNotFoundException("File not found at path: {$info['path']}");
         }
 
-        $metadata = json_decode($this->redis->hget($this->applyPathPrefix($info['dirname']), $info['basename']), TRUE);
+        $metadata = json_decode($this->redis->get($this->applyPathPrefix($info['dirname']) ."/" . $info['basename']), TRUE);
 
         if ($metadata && $metadata['type'] === 'file') {
             $metadata['contents'] = base64_decode($metadata['contents']);

@@ -13,7 +13,10 @@
         "react/http": "^1.2",
         "clue/redis-react": "^2.4",
         "predis/predis": "^1.1",
-        "danhunsaker/flysystem-redis": "^1.0"
+        "danhunsaker/flysystem-redis": "^1.0",
+        "guzzlehttp/guzzle": "^7.3",
+        "league/flysystem-aws-s3-v3": "^1.0.0",
+        "react/child-process": "^0.6.2"
     },
     "autoload": {
         "psr-4": {

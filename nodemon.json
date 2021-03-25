@@ -1,7 +1,7 @@
 {
   "verbose": true,
-  "ignore": ["vendor/*"],
+  "ignore": ["vendor/*","redix-data/*","cache/*",".git","node_modules/**/node_modules"],
   "execMap": {
-    "php": "ruby"
+    "php": "php"
   }
 }
