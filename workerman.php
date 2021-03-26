@@ -4,15 +4,24 @@ use Workerman\Worker;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+$options = \Colombo\Cdn\ArgvParser::parseArgs($argv);
+
+$ip = $options['ip'] ?? '127.0.0.1';
+$port = $options['port'] ?? 8888;
+$worker_count = $options['w'] ?? 1;
+$config = $options['c'] ?? 'config.php';
+
+//var_dump($options);
+
 // Create a Websocket server
-$ws_worker = new Worker('http://0.0.0.0:8888');
+$ws_worker = new Worker('http://' . $ip . ':' . $port);
 
 // 4 processes
-$ws_worker->count = 1;
+$ws_worker->count = $worker_count;
 
 // setup glide
 
-$config = include __DIR__ . "/config.php";
+$config = include __DIR__ . "/" . $config;
 
 $api = new \League\Glide\Api\Api($config['imageManager'], $config['manipulators']);
 
@@ -28,7 +37,7 @@ $glide_server->setResponseFactory(new \League\Glide\Responses\PsrResponseFactory
 
 // Emitted when new connection come
 $ws_worker->onConnect = function ($connection) {
-    echo "New connection\n" . get_class($connection);
+//    echo "New connection\n" . get_class($connection);
 };
 
 // Emitted when data received
@@ -42,18 +51,21 @@ $ws_worker->onMessage = function ($connection, $request) use ($glide_server) {
         $w_response = new \Workerman\Protocols\Http\Response();
         $w_response->withHeaders($response->getHeaders());
         $w_response->withBody($response->getBody());
-        $connection->send($w_response);
+        $connection->close($w_response);
     }catch (\Exception $ex){
-        echo "Error " . $ex->getFile() . ":" . $ex->getLine() . "\n";
-        echo "\t" . $ex->getMessage() . "\n";
-
-        $connection->send('Error ' . $ex->getMessage(), true);
+        if($ex instanceof \GuzzleHttp\Exception\RequestException){
+            $connection->close(new \Workerman\Protocols\Http\Response(404, [], 'Lỗi rồi '));
+        }else{
+            echo "Error " . $ex->getFile() . ":" . $ex->getLine() . "\n";
+            echo "\t" . $ex->getMessage() . "\n";
+            $connection->close(new \Workerman\Protocols\Http\Response(500, [], 'Lỗi rồi '));
+        }
     }
 };
 
 // Emitted when connection closed
 $ws_worker->onClose = function ($connection) {
-    echo "Connection closed\n";
+//    echo "Connection closed\n";
 };
 
 // Run worker
